@@ -1,4 +1,6 @@
-﻿using Delta.Application.Repositories.SalesRepository;
+﻿using Delta.Application.Dtos;
+using Delta.Application.Repositories.SalesRepository;
+using Delta.Application.RequestHelpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Delta.WebAPI.Controllers;
@@ -12,6 +14,12 @@ public class SalesController : ControllerBase
     public SalesController(ISalesRepository saleRepository)
     {
         _saleRepository = saleRepository;
+    }
+
+    [HttpGet]
+    public async Task<List<SaleDto>> GetSales([FromQuery] SalesParams saleParams)
+    {
+        return await _saleRepository.GetSales(saleParams);
     }
 
     [HttpPost("upload")]

@@ -1,6 +1,11 @@
-﻿using Delta.Domain;
+﻿using Delta.Application.Dtos;
+using Delta.Application.Extensions;
+using Delta.Application.RequestHelpers;
+using Delta.Domain;
 using Delta.Domain.Models;
+using Mapster;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace Delta.Application.Repositories.SalesRepository;
@@ -29,6 +34,24 @@ public class SalesRepository : ISalesRepository
             throw new Exception("Error uploading sales data: " + ex.Message, ex);
         }
     }
+    public async Task<List<SaleDto>> GetSales(SalesParams salesParams)
+    {
+        try
+        {
+            var query = context.Sales
+                .Sort(salesParams.OrderBy)
+                .Search(salesParams.SearchTerm)
+                .Filter(salesParams.Manager, salesParams.Client)
+            .AsQueryable();
+
+            return await query.ProjectToType<SaleDto>().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error get sales data: " + ex.Message, ex);
+        }
+    }
+
 
     private void ValidateFileName(string fileName, out string managerName, out DateTime uploadDateUtc)
     {
